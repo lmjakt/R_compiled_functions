@@ -7,7 +7,7 @@
 // that this might have order based effects, but I can't think of a better way
 // to start with.
 
-SEXP grow_linear_clusters( SEXP r_delta, r_max_delta )
+SEXP grow_linear_clusters( SEXP r_delta, SEXP r_max_delta )
 {
   if( TYPEOF(r_delta) != REALSXP )
     error("The distances must be given as real values\n");
@@ -24,8 +24,8 @@ SEXP grow_linear_clusters( SEXP r_delta, r_max_delta )
 
   int nrow=dims[0];
 
-  double max_delta = asDouble( max_delta );
-  double *delta = DOUBLE( r_delta );
+  double max_delta = asReal( r_max_delta );
+  double *delta = REAL( r_delta );
 
   // represent cluster membership simply as a number for the given window. We can
   // consider later on to make a more complicated data structure containing more
@@ -38,16 +38,19 @@ SEXP grow_linear_clusters( SEXP r_delta, r_max_delta )
   // the begin and end of the current cluster
   size_t b, e, ee;
   // the maximum distance
-  double max_d = 0;
+
+  // we don't need to know the maximum delta, but in future versions we may wish
+  // to return it as part of a list as this is useful information for the end user.
+  // but first 
+  // double max_d = 0; 
   int current_cluster = 1;
 
-  size_t i,j;
   for(b = 0; b < nrow; ++b){
-    max_d = 0;
-    for(e = b + 1; j < nrow; ++e){
+    //    max_d = 0;
+    for(e = b + 1; b < nrow; ++e){
       clusters[e] = current_cluster;
       for(ee = e-1; ee >= b; --ee){
-	if( dist[ e * nrow + ee ] > max_d ){
+	if( delta[ e * nrow + ee ] > max_delta ){
 	  e = e - 1;
 	  ee = -1;
 	  clusters[e] = 0;
